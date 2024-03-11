@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            background-color: #e2e2e;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row m-5">
+        <div class="col-md-6 offset-md-3">
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <h3>Donate to Free Education</h3>
+                    <div class ="m-2">
+                        <label for="user_name">Your Name</label>
+                        <input type="text" class="form-control" id="user_name" placeholder="Enter your name">
+                    </div>
+                    <div class ="m-2">
+                        <label for="user_phone">Your Phone</label>
+                        <input type="text" class="form-control" id="user_phone" placeholder="Enter your phone no">
+                    </div>
+
+                    <div class ="m-2">
+                        <label for="user_amount">Amount</label>
+                        <input type="text" class="form-control" id="user_amount" placeholder="Enter your amount">
+                    </div>
+                    <div class ="container text-center">
+                        <button class="btn btn-primary btn-sm" onclick="startPayment()">Proceed to Pay</button>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<h1>This is About Page</h1>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+    function updatePaymentStatus(payment_id, order_id, status) {
+     $.ajax({
+         url: "/user/update/payment",
+         type: "POST",
+         data: JSON.stringify({ payment_id: payment_id, order_id: order_id, status: status }),
+         contentType: "application/json",
+         dataType: "json",
+         success: function (response) {
+            swal("Good Job!",'Payment Success !!!',"success");
+         },
+         error: function (error) {
+             console.log(error);
+         }
+     });
+ }
+     async function startPayment() {
+      console.log("Payment started");
+      const amount = document.querySelector("#user_amount").value;
+
+       $.ajax({
+          url: "/user/create/order",
+          type: "POST",
+          data: JSON.stringify({ amount: amount, info: 'order_request' }),
+          contentType: "application/json",
+          dataType: "json",
+          success: function (response) {
+              console.log(response);
+              if(response.status == 'created'){
+                    var options = {
+                          "key": "rzp_test_DxCnFqDytGpljd",
+                          "amount": response.amount, // Example: 2000 paise = INR 20
+                          "currency": response.currency,
+                          "name": "Donation",
+                          image: "data:image/jpeg;base64,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",
+                             "order_id": response.id,
+                             handler:function(response){
+                             console.log(response.razorpay_payment_id);
+                             console.log(response.razorpay_order_id);
+                             console.log(response.razorpay_signature);
+                             console.log('Payment Success !!!');
+                             UpdatePaymentStatus(response.razorpay_payment_id, response.razorpay_order_id,'paid');
+
+                             },
+                             prefill: {
+                                 name: document.querySelector("#user_name").value,
+                                 contact: document.querySelector("#user_phone").value,
+                             },
+                             theme: {
+                                 color: "#3399cc",
+                             },
+                             notes: {
+                                 address: "Razorpay Corporate Office",
+                             },
+              };
+
+              let rzp = new Razorpay(options);
+              rzp.on('payment.failed',function (response){
+              alert(response.error.code);
+                 console.log(response.error.description);
+                 console.log(response.error.source);
+                 console.log(response.error.step);
+                 console.log(response.error.reason);
+                 console.log(response.error.metadata.order_id);
+                 console.log(response.error.metadata.payment_id);
+                 swal("Failed !!",'Oops Payment Failed',"error");
+              });
+             rzp.open();
+                 }
+          },
+          error: function (error) {
+              console.log(error);
+          }
+      });
+  }
+
+
+
+
+</script>
+</body>
+</html>
